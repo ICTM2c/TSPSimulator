@@ -1,28 +1,25 @@
 package Simulators;//Simulators.Permute.java
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
+import java.util.function.Consumer;
 
 class Permute<E> {
 
-    public Set<List<E>> listPermutations(List<E> lst) {
-        Set<List<E>> perms = new HashSet<List<E>>();
-        permute(lst, 0, perms);
-        return perms;
+    public void listPermutations(List<E> lst, Consumer<List<E>> callback) {
+        permute(lst, 0, callback);
     }
 
-    private void permute(List<E> lst, int start, Set<List<E>> perms) {
+    private void permute(List<E> lst, int start, Consumer<List<E>> callback) {
         if (start >= lst.size()) {
-            // nothing left to permute 
-            perms.add(lst);
+            // nothing left to permute
+            callback.accept(lst);
+            return;
         }
 
         for (int i = start; i < lst.size(); i++) {
             // swap elements at locations start and i
             swap(lst, start, i);
             List<E> newList = new ArrayList<>(lst);
-            permute(newList, start + 1, perms);
+            permute(newList, start + 1, callback);
             swap(lst, start, i);
         }
     }

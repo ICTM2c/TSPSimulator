@@ -8,32 +8,38 @@ import java.util.Set;
 
 public class SimulatorBruteForce implements Simulator {
 
+    double _shortestLength;
+    List<Point2D> _shortest;
+    boolean isShorter(double length) {
+        return length < _shortestLength;
+    }
+
+    void setCurrentPath(List<Point2D> path, double length) {
+        _shortestLength = length;
+        _shortest = path;
+    }
+
     @Override
     public List<Point2D> simulate(Point2D startEndPoint, List<Point2D> points) {
         if (points.size() == 0) {
             return new ArrayList<Point2D>();
         }
 
+        // Reset the saved path and length
+        setCurrentPath(null, Double.MAX_VALUE);
+
         // Create a new permute object to generate all possible combinations
         Permute<Point2D> perm = new Permute<Point2D>();
-        Set<List<Point2D>> combinations = perm.listPermutations(points);
-
-
-        List<Point2D> shortest = null;
-        double shortestLength = Double.MAX_VALUE;
-
-        // Go through every combination and check if it's the shortest we found yet.
-        for (List<Point2D> track : combinations) {
+        perm.listPermutations(points, track -> {
             track.add(0, startEndPoint);
             track.add(startEndPoint);
             double length = getLength(track);
-            if (length < shortestLength) {
-                shortestLength = length;
-                shortest = track;
+            if (isShorter(length)) {
+                setCurrentPath(track, length);
             }
-        }
+        });
 
-        return shortest;
+        return _shortest;
     }
 
     private static double getLength(List<Point2D> track) {
