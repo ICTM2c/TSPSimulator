@@ -9,10 +9,19 @@ public class SimulatorSmartGreedy extends SimulatorGreedy {
     private Point2D _startEndPoint;
     @Override
     public List<Point2D> simulate(Point2D startEndPoint, List<Point2D> points) {
+        if (points.isEmpty()) {
+            return super.simulate(startEndPoint, points);
+        }
         _startEndPoint = startEndPoint;
         return super.simulate(startEndPoint, points);
     }
 
+    /**
+     * If two points are equally far away prefer the one which is the farthest from the start/end point.
+     * @param current
+     * @param leftOver
+     * @return
+     */
     @Override
     public Point2D findClosest(Point2D current, List<Point2D> leftOver) {
         Point2D closest = null;

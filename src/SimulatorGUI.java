@@ -1,15 +1,19 @@
 import Simulators.*;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
-public class SimulatorGUI extends JFrame implements ActionListener {
+public class SimulatorGUI extends JFrame implements ActionListener, ListSelectionListener {
     private SimulatorPanel pnlSimulator;
-    private JComboBox<Simulator> cbSimulators;
+    private JList<Simulator> liSimulators;
     private TextField tbSizeX;
     private TextField tbSizeY;
+    private SimulatorRenderer _selectedCellRenderer;
 
     public SimulatorGUI() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -20,13 +24,13 @@ public class SimulatorGUI extends JFrame implements ActionListener {
         pnlSimulator = new SimulatorPanel();
         add(pnlSimulator);
 
-        cbSimulators = new JComboBox<>();
-        cbSimulators.addActionListener(this);
-        cbSimulators.addItem(new SimulatorGreedy());
-        cbSimulators.addItem(new SimulatorSmartGreedy());
-        cbSimulators.addItem(new SimulatorTwoOpt());
-        cbSimulators.addItem(new SimulatorBruteForce());
-        add(cbSimulators);
+        _selectedCellRenderer = new SimulatorRenderer();
+        liSimulators = new JList<>(new Simulator[] {new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(), });
+        liSimulators.setSelectedIndex(0);
+        liSimulators.setCellRenderer(_selectedCellRenderer);
+        liSimulators.addListSelectionListener(this);
+
+        add(liSimulators);
 
         tbSizeX = new TextField();
         tbSizeX.addActionListener(this);
@@ -36,20 +40,26 @@ public class SimulatorGUI extends JFrame implements ActionListener {
         tbSizeY.addActionListener(this);
         add(tbSizeY);
 
-        pnlSimulator.setSimulator((Simulator)cbSimulators.getSelectedItem());
+        List<Color> colors = pnlSimulator.setSimulators(liSimulators.getSelectedValuesList());
+        _selectedCellRenderer.setColors(colors);
         setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == cbSimulators) {
-            pnlSimulator.setSimulator((Simulator)cbSimulators.getSelectedItem());
-        }
-        else if (e.getSource() == tbSizeX) {
+        if (e.getSource() == tbSizeX) {
             pnlSimulator.setSizeX(Integer.valueOf(tbSizeX.getText()));
         }
         else if (e.getSource() == tbSizeY) {
             pnlSimulator.setSizeY(Integer.valueOf(tbSizeY.getText()));
         }
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        List<Simulator> selectedSimulators = liSimulators.getSelectedValuesList();
+        List<Color> colors = pnlSimulator.setSimulators(selectedSimulators);
+        _selectedCellRenderer.setColors(colors);
+        liSimulators.repaint();
     }
 }

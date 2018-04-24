@@ -7,12 +7,14 @@ import Simulators.Simulator;
 import javafx.geometry.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SimulatorPanel extends JPanel implements MouseListener {
     private int _sizeX = 5;
     private int _sizeY = 5;
     private boolean[] _clicked;
-    private Simulator _simulator;
+    private List<Simulator> _simulators;
+    private static final Color[] s_pathColors = new Color[] {Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE};
 
     public SimulatorPanel() {
         setPreferredSize(new Dimension(400, 400));
@@ -29,7 +31,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        drawGrid(g);
+        drawPanel(g);
 
         drawSelectedSquares(g);
 
@@ -40,19 +42,32 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         g.setColor(Color.RED);
         Point2D startEndPoint = new Point2D(0, _sizeY - 1);
         List<Point2D> points = getPoints();
-        List<Point2D> route = _simulator.simulate(startEndPoint, points);
         double squareWidth = ((double)getWidth() / (double)_sizeX);
         double squareHeight = ((double)getHeight() / (double)_sizeY);
-        for (int i = 0; i < route.size() - 1; i++) {
-            Point2D current = route.get(i);
-            Point2D next = route.get(i + 1);
-            Util.drawArrowLine(g,
-                    (int)(current.getX() * squareWidth  + (squareWidth  / 2.0)),
-                    (int)(current.getY() * squareHeight + (squareHeight / 2.0)),
-                    (int)(next.getX()    * squareWidth  + (squareWidth  / 2.0)),
-                    (int)(next.getY()    * squareHeight + (squareHeight / 2.0)),
-                    8,8
-            );
+
+        List<List<Point2D>> paths = _simulators.parallelStream().map(simulator -> {
+            // Make a copy of the selected point list. Otherwise simulators might interfere with each other.
+            List<Point2D> copyOfPoints = new ArrayList<>(points);
+            return simulator.simulate(startEndPoint, copyOfPoints);
+        }).collect(Collectors.toList());
+
+        double offsetWidth = squareWidth / (paths.size() + 1);
+        double offsetHeight = squareHeight / (paths.size() + 1);
+        int numPath = 0;
+        for (List<Point2D> route : paths) {
+            g.setColor(s_pathColors[numPath]);
+            numPath++;
+            for (int i = 0; i < route.size() - 1; i++) {
+                Point2D current = route.get(i);
+                Point2D next = route.get(i + 1);
+                Util.drawArrowLine(g,
+                        (int) (current.getX() * squareWidth +    (numPath * offsetWidth)),            //(squareWidth / 2.0)),
+                        (int) (current.getY() * squareHeight +   (numPath * offsetHeight)),            //(squareHeight / 2.0)),
+                        (int) (next.getX() * squareWidth +       (numPath * offsetWidth)),            //(squareWidth / 2.0)),
+                        (int) (next.getY() * squareHeight +      (numPath * offsetHeight)),            //(squareHeight / 2.0)),
+                        8, 8
+                );
+            }
         }
     }
 
@@ -69,7 +84,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         }
     }
 
-    private void drawGrid(Graphics g) {
+    private void drawPanel(Graphics g) {
         g.setColor(Color.LIGHT_GRAY);
         for (int x = 0; x < _sizeX; x++) {
             int absoluteX = (int)((double)getWidth() / (double)_sizeX * (double)x);
@@ -84,7 +99,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
     }
 
-    private void drawGrid() {
+    private void drawPanel() {
         repaint();
     }
 
@@ -103,12 +118,13 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         int y = map(e.getY(), 0, getHeight(), 0, _sizeY);
         toggleIsSelected(x, y);
 
-        drawGrid();
+        drawPanel();
     }
 
     public void setSimulator(Simulator selectedItem) {
-        _simulator = selectedItem;
-        drawGrid();
+        _simulators = new ArrayList<Simulator>();
+        _simulators.add(selectedItem);
+        drawPanel();
     }
 
     public int makeIndex(int x, int y) {
@@ -161,12 +177,22 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     public void setSizeX(Integer integer) {
         _sizeX = integer;
         fillClicked();
-        drawGrid();
+        drawPanel();
     }
 
     public void setSizeY(Integer integer) {
         _sizeY = integer;
         fillClicked();
-        drawGrid();
+        drawPanel();
+    }
+
+    public List<Color> setSimulators(List<Simulator> selectedSimulators) {
+        _simulators = selectedSimulators;
+        List<Color> colors = new ArrayList<>();
+        for (int i = 0; i < _simulators.size(); i++) {
+            colors.add(s_pathColors[i]);
+        }
+        drawPanel();
+        return colors;
     }
 }
