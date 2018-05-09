@@ -14,6 +14,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
     private TextField tbSizeX;
     private TextField tbSizeY;
     private SimulatorRenderer _selectedCellRenderer;
+    private JButton btnCancel;
 
     public SimulatorGUI() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -25,7 +26,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         add(pnlSimulator);
 
         _selectedCellRenderer = new SimulatorRenderer();
-        liSimulators = new JList<>(new Simulator[] {new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(), });
+        liSimulators = new JList<>(new Simulator[]{new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(),});
         liSimulators.setSelectedIndex(0);
         liSimulators.setCellRenderer(_selectedCellRenderer);
         liSimulators.addListSelectionListener(this);
@@ -40,6 +41,10 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         tbSizeY.addActionListener(this);
         add(tbSizeY);
 
+        btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener(this);
+        add(btnCancel);
+
         List<Color> colors = pnlSimulator.setSimulators(liSimulators.getSelectedValuesList());
         _selectedCellRenderer.setColors(colors);
         setVisible(true);
@@ -49,9 +54,10 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == tbSizeX) {
             pnlSimulator.setSizeX(Integer.valueOf(tbSizeX.getText()));
-        }
-        else if (e.getSource() == tbSizeY) {
+        } else if (e.getSource() == tbSizeY) {
             pnlSimulator.setSizeY(Integer.valueOf(tbSizeY.getText()));
+        } else if (e.getSource() == btnCancel) {
+            pnlSimulator.cancelSimulations();
         }
     }
 

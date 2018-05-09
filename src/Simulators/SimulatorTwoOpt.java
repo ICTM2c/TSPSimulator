@@ -39,8 +39,8 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
 
                 if (
                         line1Point1.equals(line2Point1) || line1Point1.equals(line2Point2) ||
-                        line1Point2.equals(line2Point1) || line1Point2.equals(line2Point2)
-                    ) {
+                                line1Point2.equals(line2Point1) || line1Point2.equals(line2Point2)
+                        ) {
 
                     float angle = getAngle(line1Point1, line1Point2) - getAngle(line2Point1, line2Point2);
                     if (angle == -90) {
@@ -63,7 +63,6 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
                 );
 
 
-
                 if (doesIntersect && !lastLine.intersectsLine(line1Point1.getX(), line1Point1.getY(), line2Point2.getX(), line2Point2.getY()) && !lastLine.intersectsLine(line2Point1.getX(), line2Point1.getY(), line1Point2.getX(), line1Point2.getY())) {
                     swap(points, i1 + 1, i2 + 1);
                     didIntersect = true;
@@ -79,7 +78,7 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
     public float getAngle(Point2D target1, Point2D target2) {
         float angle = (float) Math.toDegrees(Math.atan2(target1.getY() - target2.getY(), target1.getX() - target2.getX()));
 
-        if(angle < 0){
+        if (angle < 0) {
             angle += 360;
         }
 

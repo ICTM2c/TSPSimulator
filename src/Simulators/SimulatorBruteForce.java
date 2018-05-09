@@ -10,6 +10,7 @@ public class SimulatorBruteForce implements Simulator {
 
     double _shortestLength;
     List<Point2D> _shortest;
+
     boolean isShorter(double length) {
         return length < _shortestLength;
     }
