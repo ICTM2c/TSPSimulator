@@ -1,4 +1,8 @@
-import Simulators.*;
+package TSPSimulator;
+
+import TSPSimulator.Components.HeaderPanel;
+import TSPSimulator.Components.SimulatorPanel;
+import TSPSimulator.Simulators.*;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -25,13 +29,18 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         pnlSimulator = new SimulatorPanel();
         add(pnlSimulator);
 
+        //JLabel algorithmLabel = new JLabel("Algoritmes");
+        //algorithmLabel.setFont(new Font("Serif", Font.BOLD, 14));
         _selectedCellRenderer = new SimulatorRenderer();
         liSimulators = new JList<>(new Simulator[]{new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(),});
         liSimulators.setSelectedIndex(0);
         liSimulators.setCellRenderer(_selectedCellRenderer);
         liSimulators.addListSelectionListener(this);
-
-        add(liSimulators);
+        Panel algorithmPanel = new HeaderPanel("Algorithmes", liSimulators);
+        //algorithmPanel.add(algorithmLabel);
+        //algorithmPanel.add(liSimulators);
+        //algorithmPanel.setLayout(new BoxLayout(algorithmPanel, BoxLayout.Y_AXIS));
+        add(algorithmPanel);
 
         tbSizeX = new TextField();
         tbSizeX.addActionListener(this);

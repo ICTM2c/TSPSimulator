@@ -1,8 +1,7 @@
-package Simulators;
+package TSPSimulator.Simulators;
 
 import javafx.geometry.Point2D;
 
-import java.util.Comparator;
 import java.util.List;
 
 public class SimulatorSmartGreedy extends SimulatorGreedy {

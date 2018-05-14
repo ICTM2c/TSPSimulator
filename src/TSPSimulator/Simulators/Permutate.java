@@ -1,4 +1,4 @@
-package Simulators;//Simulators.Permute.java
+package TSPSimulator.Simulators;//TSPSimulator.Simulators.Permute.java
 
 import java.util.*;
 import java.util.function.Consumer;

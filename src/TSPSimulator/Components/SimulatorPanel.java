@@ -1,10 +1,14 @@
+package TSPSimulator.Components;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import Simulators.Simulator;
+import TSPSimulator.Simulators.Simulator;
+import TSPSimulator.Util;
 import javafx.geometry.Point2D;
+//import jdk.jshell.execution.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +56,10 @@ public class SimulatorPanel extends JPanel implements MouseListener {
             }).collect(Collectors.toList());
 
             // Draw the paths on the UI thread.
-            SimulatorPanel current = this;
+            SimulatorPanel self = this;
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    drawRoute(current.getGraphics(), paths);
+                    drawRoute(self.getGraphics(), paths);
                 }
             });
         });

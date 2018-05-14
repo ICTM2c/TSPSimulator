@@ -1,4 +1,6 @@
-import Simulators.Simulator;
+package TSPSimulator;
+
+import TSPSimulator.Simulators.Simulator;
 
 import javax.swing.*;
 import java.awt.*;

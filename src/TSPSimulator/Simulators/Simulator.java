@@ -1,4 +1,4 @@
-package Simulators;
+package TSPSimulator.Simulators;
 
 import javafx.geometry.Point2D;
 

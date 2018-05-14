@@ -1,10 +1,9 @@
-package Simulators;
+package TSPSimulator.Simulators;
 
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class SimulatorBruteForce implements Simulator {
 

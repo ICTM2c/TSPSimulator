@@ -1,6 +1,5 @@
-package Simulators;
+package TSPSimulator.Simulators;
 
-import Simulators.SimulatorGreedy;
 import javafx.geometry.Point2D;
 
 import java.awt.geom.Line2D;
