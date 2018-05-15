@@ -18,16 +18,34 @@ public class SimulatorLogger {
 
     public SimulatorLogger()  {
         _items = new ArrayList<>();
+
+        // Insert a header for the log.
         _items.add(new LogItem("Simulator", "Time", "Distance"));
         _lock = new ReentrantLock();
     }
-    public void LogResult(String simulator, long time, double pathLength) {
+
+    /**
+     * Inserts a new log item
+     * @param simulatorName
+     * @param time
+     * @param pathLength
+     */
+    public void logResult(String simulatorName, long time, double pathLength) {
+        // Lock this object. It's used in multiple threads.
         _lock.lock();
-        _items.add(new LogItem(simulator, time, pathLength));
+        _items.add(new LogItem(simulatorName, time, pathLength));
         _lock.unlock();
     }
 
-    public <T> int getLargestItem(List<T> list, Function<T, Object> callback) {
+    /**
+     * Searches in a list of T for the longest value.
+     * This value is provided by a callback
+     * @param list
+     * @param callback
+     * @param <T>
+     * @return
+     */
+    private <T> int getLargestItem(List<T> list, Function<T, Object> callback) {
         int largest = Integer.MIN_VALUE;
         for (T obj : list) {
             largest = Math.max(largest, String.valueOf(callback.apply(obj)).length());
@@ -35,19 +53,34 @@ public class SimulatorLogger {
         return largest;
     }
 
+    /**
+     * Repeats the provided string X times.
+     * @param str
+     * @param num
+     * @return
+     */
     private static String repeatString(String str, int num) {
         return String.join("", Collections.nCopies(num, str));
     }
 
+    /**
+     * Log all items to a file.
+     * This file can be found in the Logs folder.
+     * The filename is 'Log_{Unix Timestamp}.txt'
+     * @throws IOException
+     */
     public void writeToFile() throws IOException {
+        _lock.lock();
         int largestName = getLargestItem(_items, x -> x.getName());
         int largestTime = getLargestItem(_items, x -> x.getTime());
-        int largestPathLength = getLargestItem(_items, x -> x.getDistance());
 
-        // Create the Logs folder
+        // Create the Logs folder in case it doesn't exist.
         new File("Logs/").mkdir();
-        BufferedWriter file = new BufferedWriter(new FileWriter("Logs/Log_" + (System.currentTimeMillis() / 1000L)));
 
+        // Open the log file.
+        BufferedWriter file = new BufferedWriter(new FileWriter("Logs/Log_" + (System.currentTimeMillis() / 1000L) + ".txt"));
+
+        // Write each log item and make sure every column is aligned.
         for (LogItem item : _items) {
             file.write(item.getName());
             file.write(repeatString(" ", largestName - item.getName().length()));
@@ -56,9 +89,9 @@ public class SimulatorLogger {
             file.write(repeatString(" ", largestTime - String.valueOf(item.getTime()).length()));
             file.write(" | ");
             file.write(item.getDistance());
-            file.write(repeatString(" ", largestPathLength - String.valueOf(item.getDistance()).length()));
             file.newLine();
         }
         file.close();
+        _lock.unlock();
     }
 }

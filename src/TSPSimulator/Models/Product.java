@@ -19,7 +19,8 @@ public class Product {
     public void setPosition(int x, int y) {
         _location = new Point2D(x, y);
     }
-    public static Product FromResultSet(ResultSet rs) throws SQLException {
+
+    public static Product fromResultSet(ResultSet rs) throws SQLException {
         Product pr = new Product(rs.getInt("productid"), rs.getInt("size"));
         pr.setPosition(rs.getInt("X"), rs.getInt("Y"));
         return pr;

@@ -42,10 +42,37 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         fillClicked();
     }
 
+
+    //region GridClicked
     private void fillClicked() {
         _clicked = new boolean[_sizeX * _sizeY];
     }
+    public void clearClicked() {
+        fillClicked();
+    }
 
+    public void setIsClicked(int x, int y, boolean clicked) {
+        int index = makeIndex(x, y);
+        _clicked[index] = clicked;
+    }
+
+    public int makeIndex(int x, int y) {
+        return x + y * _sizeX;
+    }
+
+    public boolean isSelected(int x, int y) {
+        int index = makeIndex(x, y);
+        return _clicked[index];
+    }
+
+    public void toggleIsSelected(int x, int y) {
+        int index = makeIndex(x, y);
+        _clicked[index] = !_clicked[index];
+    }
+    //endregion
+
+
+    //region Painting
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -74,7 +101,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
                 List<Point2D> route = simulator.simulate(startEndPoint, copyOfPoints);
                 long endTime = System.currentTimeMillis();
                 if (_simulatorLogger != null) {
-                    _simulatorLogger.LogResult(simulator.toString(), endTime - startTime, SimulatorBruteForce.getLength(route));
+                    _simulatorLogger.logResult(simulator.toString(), endTime - startTime, SimulatorBruteForce.getLength(route));
                 }
 
                 int currentSimulatorIndex = _simulators.indexOf(simulator);
@@ -97,18 +124,6 @@ public class SimulatorPanel extends JPanel implements MouseListener {
             });
         });
         _simulateThread.start();
-    }
-
-    private void writeLog() {
-        if (_simulatorLogger == null) {
-            return;
-        }
-        try {
-            _simulatorLogger.writeToFile();
-            _simulatorLogger = null;
-        } catch (IOException e) {
-            //e.printStackTrace();
-        }
     }
 
     private void drawRoute(Graphics g, List<Point2D> route, int numSimulators, int currentSimulatorIndex) {
@@ -167,6 +182,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         repaint();
     }
 
+    //endregion
 
     int map(int x, int in_min, int in_max, int out_min, int out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -189,20 +205,6 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         drawPanel();
     }
 
-    public int makeIndex(int x, int y) {
-        return x + y * _sizeX;
-    }
-
-    public boolean isSelected(int x, int y) {
-        int index = makeIndex(x, y);
-        return _clicked[index];
-    }
-
-    public void toggleIsSelected(int x, int y) {
-        int index = makeIndex(x, y);
-        _clicked[index] = !_clicked[index];
-    }
-
 
     public List<Point2D> getPoints() {
         List<Point2D> list = new ArrayList<>();
@@ -216,6 +218,67 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         return list;
     }
 
+    public void setSizeX(Integer integer) {
+        _sizeX = integer;
+        fillClicked();
+        drawPanel();
+    }
+
+    public void setSizeY(Integer integer) {
+        _sizeY = integer;
+        fillClicked();
+        drawPanel();
+    }
+
+    /*
+    Executes the provided simulators
+     */
+
+    public List<Color> setSimulators(List<Simulator> selectedSimulators) {
+        _simulatorLogger = null;
+        _simulators = selectedSimulators;
+        List<Color> colors = new ArrayList<>();
+        for (int i = 0; i < _simulators.size(); i++) {
+            colors.add(s_pathColors[i]);
+        }
+        drawPanel();
+        return colors;
+    }
+
+    /**
+     If the simulator thread is working it stops it and writes "Interrupted" on the panel.
+      */
+    public void cancelSimulations() {
+        if (_simulateThread.isAlive()) {
+            _simulateThread.stop();
+            Graphics g = this.getGraphics();
+            g.setColor(Color.RED);
+            g.drawString("Interrupted", 10, 10);
+            _simulatorLogger = null;
+            onEndSimulationCallback.run();
+        }
+    }
+    public void simulateAndLog() {
+        cancelSimulations();
+        _simulatorLogger = new SimulatorLogger();
+        drawPanel();
+    }
+
+
+    private void writeLog() {
+        if (_simulatorLogger == null) {
+            return;
+        }
+        try {
+            _simulatorLogger.writeToFile();
+            _simulatorLogger = null;
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
+    }
+
+    //region UnusedEvents
+    // Lots of unised events because Oracle thought it was a good idea to automatically register all events.
     @Override
     public void mousePressed(MouseEvent e) {
 
@@ -235,60 +298,5 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     public void mouseExited(MouseEvent e) {
 
     }
-
-    public void setSizeX(Integer integer) {
-        _sizeX = integer;
-        fillClicked();
-        drawPanel();
-    }
-
-    public void setSizeY(Integer integer) {
-        _sizeY = integer;
-        fillClicked();
-        drawPanel();
-    }
-
-    /*
-    Executes the provided simulators
-     */
-    public List<Color> setSimulators(List<Simulator> selectedSimulators) {
-        _simulatorLogger = null;
-        _simulators = selectedSimulators;
-        List<Color> colors = new ArrayList<>();
-        for (int i = 0; i < _simulators.size(); i++) {
-            colors.add(s_pathColors[i]);
-        }
-        drawPanel();
-        return colors;
-    }
-
-    /*
-     If the simulator thread is working it stops it and writes "Interrupted" on the panel.
-      */
-    public void cancelSimulations() {
-        if (_simulateThread.isAlive()) {
-            _simulateThread.stop();
-            Graphics g = this.getGraphics();
-            g.setColor(Color.RED);
-            g.drawString("Interrupted", 10, 10);
-            _simulatorLogger = null;
-            onEndSimulationCallback.run();
-        }
-    }
-
-    public void simulateAndLog() {
-        cancelSimulations();
-        _simulatorLogger = new SimulatorLogger();
-        drawPanel();
-    }
-
-
-    public void clearClicked() {
-        fillClicked();
-    }
-
-    public void setIsClicked(int x, int y, boolean clicked) {
-        int index = makeIndex(x, y);
-        _clicked[index] = clicked;
-    }
+    //endregion
 }

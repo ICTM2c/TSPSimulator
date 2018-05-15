@@ -3,11 +3,11 @@ package TSPSimulator;
 import TSPSimulator.Components.HeaderPanel;
 import TSPSimulator.Components.SimulatorPanel;
 import TSPSimulator.Components.SimulatorRenderer;
-import TSPSimulator.Database.Product;
+import TSPSimulator.Database.DbProduct;
 import TSPSimulator.Models.Order;
 import TSPSimulator.Simulators.*;
 import com.google.gson.Gson;
-import com.oracle.tools.packager.IOUtils;
+import com.google.gson.JsonSyntaxException;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -16,7 +16,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.nio.file.Files;
+import java.sql.SQLException;
 import java.util.List;
 
 public class SimulatorGUI extends JFrame implements ActionListener, ListSelectionListener {
@@ -138,26 +138,32 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         }
 
         File f = fc.getSelectedFile();
-//        Files.readAllBytes(f);
-        try {
-            try(FileInputStream br = new FileInputStream(f.getAbsolutePath())) {
-                String json = new String(br.readAllBytes(), "UTF-8");
-                Gson deserialize = new Gson();
-                Order order = deserialize.fromJson(json, Order.class);
-                System.out.println(order.getOrder());
-                List<TSPSimulator.Models.Product> products = Product.Get().FindProductsForOder(order.getOrder());
-                pnlSimulator.clearClicked();
-                pnlSimulator.setSize(5, 5);
-                for (TSPSimulator.Models.Product product : products) {
-                    pnlSimulator.setIsClicked((int)product.getLocation().getX(), (int)product.getLocation().getY(), true);
-                }
+        try(FileInputStream br = new FileInputStream(f.getAbsolutePath())) {
+            String json = new String(br.readAllBytes(), "UTF-8");
+            Gson deserialize = new Gson();
+            Order order = deserialize.fromJson(json, Order.class);
+            System.out.println(order.getOrder());
+            List<TSPSimulator.Models.Product> products = DbProduct.Get().findProductsForOrder(order.getOrder());
+            pnlSimulator.clearClicked();
+            pnlSimulator.setSize(5, 5);
+            for (TSPSimulator.Models.Product product : products) {
+                pnlSimulator.setIsClicked((int)product.getLocation().getX(), (int)product.getLocation().getY(), true);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Unable to retrieve the order from the database.");
         }
         catch (FileNotFoundException e) {
-
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "The file could not be found. Has it been removed?");
         }
         catch (IOException e) {
-
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Unable to open the order file.");
+        }
+        catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "The file is not an order file.");
         }
 
     }

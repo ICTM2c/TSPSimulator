@@ -25,8 +25,8 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
         boolean didIntersect = false;
 
         Line2D lastLine = getLastLine(points);
-        for (int i1 = 1; i1 < numPoints; i1++) {
-            for (int i2 = 1; i2 < numPoints; i2++) {
+        for (int i1 = 0; i1 < numPoints; i1++) {
+            for (int i2 = 0; i2 < numPoints; i2++) {
                 if (i1 == i2) {
                     continue;
                 }
@@ -38,15 +38,8 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
 
                 if (
                         line1Point1.equals(line2Point1) || line1Point1.equals(line2Point2) ||
-                                line1Point2.equals(line2Point1) || line1Point2.equals(line2Point2)
+                        line1Point2.equals(line2Point1) || line1Point2.equals(line2Point2)
                         ) {
-
-                    float angle = getAngle(line1Point1, line1Point2) - getAngle(line2Point1, line2Point2);
-                    if (angle == -90) {
-                        swap(points, i1 + 1, i2 + 1);
-                        didIntersect = true;
-
-                    }
 
                     // Line2D.linesIntersect also returns true if the coordinates are the same.
                     continue;
@@ -62,7 +55,7 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
                 );
 
 
-                if (doesIntersect && !lastLine.intersectsLine(line1Point1.getX(), line1Point1.getY(), line2Point2.getX(), line2Point2.getY()) && !lastLine.intersectsLine(line2Point1.getX(), line2Point1.getY(), line1Point2.getX(), line1Point2.getY())) {
+                if (doesIntersect) {// && !lastLine.intersectsLine(line1Point1.getX(), line1Point1.getY(), line2Point2.getX(), line2Point2.getY()) && !lastLine.intersectsLine(line2Point1.getX(), line2Point1.getY(), line1Point2.getX(), line1Point2.getY())) {
                     swap(points, i1 + 1, i2 + 1);
                     didIntersect = true;
                 }
