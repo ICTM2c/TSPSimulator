@@ -1,4 +1,4 @@
-package TSPSimulator;
+package TSPSimulator.Components;
 
 import TSPSimulator.Simulators.Simulator;
 
@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-class SimulatorRenderer extends JLabel implements ListCellRenderer<Simulator> {
+public class SimulatorRenderer extends JLabel implements ListCellRenderer<Simulator> {
     private java.util.List<Color> _colors;
 
     public void setColors(java.util.List<Color> colors) {

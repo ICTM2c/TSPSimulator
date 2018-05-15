@@ -5,14 +5,15 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import TSPSimulator.Logging.SimulatorLogger;
 import TSPSimulator.Simulators.Simulator;
+import TSPSimulator.Simulators.SimulatorBruteForce;
 import TSPSimulator.Util;
 import javafx.geometry.Point2D;
-//import jdk.jshell.execution.Util;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SimulatorPanel extends JPanel implements MouseListener {
     private int _sizeX = 5;
@@ -21,6 +22,18 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     private List<Simulator> _simulators;
     private static final Color[] s_pathColors = new Color[]{Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE};
     Thread _simulateThread = new Thread();
+    private SimulatorLogger _simulatorLogger;
+
+    private Runnable onStartSimulationCallback;
+    private Runnable onEndSimulationCallback;
+
+    public void registerOnStartSimulationCallback(Runnable callback) {
+        onStartSimulationCallback = callback;
+    }
+
+    public void registerOnEndSimulationCallback(Runnable callback) {
+        onEndSimulationCallback = callback;
+    }
 
     public SimulatorPanel() {
         setPreferredSize(new Dimension(400, 400));
@@ -37,10 +50,14 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Notify the GUI that the simulation has started.
+        onStartSimulationCallback.run();
+
         drawPanel(g);
 
         drawSelectedSquares(g);
 
+        // If there is still a simulation going on stop it before starting new ones.
         if (_simulateThread.isAlive()) {
             _simulateThread.stop();
         }
@@ -49,46 +66,72 @@ public class SimulatorPanel extends JPanel implements MouseListener {
             // Start calculating the paths in advance.
             Point2D startEndPoint = new Point2D(0, _sizeY - 1);
             List<Point2D> points = getPoints();
-            List<List<Point2D>> paths = _simulators.parallelStream().map(simulator -> {
+            _simulators.parallelStream().forEach(simulator -> {
                 // Make a copy of the selected point list. Otherwise simulators might interfere with each other.
                 List<Point2D> copyOfPoints = new ArrayList<>(points);
-                return simulator.simulate(startEndPoint, copyOfPoints);
-            }).collect(Collectors.toList());
 
-            // Draw the paths on the UI thread.
-            SimulatorPanel self = this;
+                long startTime = System.currentTimeMillis();
+                List<Point2D> route = simulator.simulate(startEndPoint, copyOfPoints);
+                long endTime = System.currentTimeMillis();
+                if (_simulatorLogger != null) {
+                    _simulatorLogger.LogResult(simulator.toString(), endTime - startTime, SimulatorBruteForce.getLength(route));
+                }
+
+                int currentSimulatorIndex = _simulators.indexOf(simulator);
+
+                // Draw the paths on the UI thread.
+                SimulatorPanel self = this;
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        drawRoute(self.getGraphics(), route, _simulators.size(), currentSimulatorIndex);
+                    }
+                });
+
+            });
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    drawRoute(self.getGraphics(), paths);
+                    writeLog();
+                    onEndSimulationCallback.run();
                 }
             });
         });
         _simulateThread.start();
-
     }
 
-    private void drawRoute(Graphics g, List<List<Point2D>> paths) {
+    private void writeLog() {
+        if (_simulatorLogger == null) {
+            return;
+        }
+        try {
+            _simulatorLogger.writeToFile();
+            _simulatorLogger = null;
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
+    }
+
+    private void drawRoute(Graphics g, List<Point2D> route, int numSimulators, int currentSimulatorIndex) {
         g.setColor(Color.RED);
         double squareWidth = ((double) getWidth() / (double) _sizeX);
         double squareHeight = ((double) getHeight() / (double) _sizeY);
 
-        double offsetWidth = squareWidth / (paths.size() + 1);
-        double offsetHeight = squareHeight / (paths.size() + 1);
-        int numPath = 0;
-        for (List<Point2D> route : paths) {
-            g.setColor(s_pathColors[numPath]);
-            numPath++;
-            for (int i = 0; i < route.size() - 1; i++) {
-                Point2D current = route.get(i);
-                Point2D next = route.get(i + 1);
-                Util.drawArrowLine(g,
-                        (int) (current.getX() * squareWidth + (numPath * offsetWidth)),            //(squareWidth / 2.0)),
-                        (int) (current.getY() * squareHeight + (numPath * offsetHeight)),            //(squareHeight / 2.0)),
-                        (int) (next.getX() * squareWidth + (numPath * offsetWidth)),            //(squareWidth / 2.0)),
-                        (int) (next.getY() * squareHeight + (numPath * offsetHeight)),            //(squareHeight / 2.0)),
-                        8, 8
-                );
-            }
+        double offsetWidth = squareWidth / (numSimulators + 1);
+        double offsetHeight = squareHeight / (numSimulators + 1);
+
+        g.setColor(s_pathColors[currentSimulatorIndex]);
+
+        currentSimulatorIndex++;
+        for (int i = 0; i < route.size() - 1; i++) {
+            Point2D current = route.get(i);
+            Point2D next = route.get(i + 1);
+            Util.drawArrowLine(g,
+                    (int) (current.getX() * squareWidth + (currentSimulatorIndex * offsetWidth)),
+                    (int) (current.getY() * squareHeight + (currentSimulatorIndex * offsetHeight)),
+                    (int) (next.getX() * squareWidth + (currentSimulatorIndex * offsetWidth)),
+                    (int) (next.getY() * squareHeight + (currentSimulatorIndex * offsetHeight)),
+                    8, 8
+            );
         }
     }
 
@@ -120,7 +163,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
     }
 
-    private void drawPanel() {
+    public void drawPanel() {
         repaint();
     }
 
@@ -209,6 +252,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     Executes the provided simulators
      */
     public List<Color> setSimulators(List<Simulator> selectedSimulators) {
+        _simulatorLogger = null;
         _simulators = selectedSimulators;
         List<Color> colors = new ArrayList<>();
         for (int i = 0; i < _simulators.size(); i++) {
@@ -227,6 +271,24 @@ public class SimulatorPanel extends JPanel implements MouseListener {
             Graphics g = this.getGraphics();
             g.setColor(Color.RED);
             g.drawString("Interrupted", 10, 10);
+            _simulatorLogger = null;
+            onEndSimulationCallback.run();
         }
+    }
+
+    public void simulateAndLog() {
+        cancelSimulations();
+        _simulatorLogger = new SimulatorLogger();
+        drawPanel();
+    }
+
+
+    public void clearClicked() {
+        fillClicked();
+    }
+
+    public void setIsClicked(int x, int y, boolean clicked) {
+        int index = makeIndex(x, y);
+        _clicked[index] = clicked;
     }
 }

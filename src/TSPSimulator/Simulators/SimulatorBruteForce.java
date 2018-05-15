@@ -42,7 +42,7 @@ public class SimulatorBruteForce implements Simulator {
         return _shortest;
     }
 
-    private static double getLength(List<Point2D> track) {
+    public static double getLength(List<Point2D> track) {
         double length = 0;
         for (int i = 0; i < track.size() - 1; i++) {
             Point2D current = track.get(i);
