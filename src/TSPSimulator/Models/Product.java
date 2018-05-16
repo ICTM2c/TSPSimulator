@@ -2,7 +2,6 @@ package TSPSimulator.Models;
 
 import javafx.geometry.Point2D;
 
-import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

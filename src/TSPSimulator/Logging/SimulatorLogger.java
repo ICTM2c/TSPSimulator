@@ -1,5 +1,6 @@
 package TSPSimulator.Logging;
 
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -9,14 +10,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class SimulatorLogger {
     private List<LogItem> _items;
     private Lock _lock;
 
-    public SimulatorLogger()  {
+    public SimulatorLogger() {
         _items = new ArrayList<>();
 
         // Insert a header for the log.
@@ -26,6 +26,7 @@ public class SimulatorLogger {
 
     /**
      * Inserts a new log item
+     *
      * @param simulatorName
      * @param time
      * @param pathLength
@@ -40,6 +41,7 @@ public class SimulatorLogger {
     /**
      * Searches in a list of T for the longest value.
      * This value is provided by a callback
+     *
      * @param list
      * @param callback
      * @param <T>
@@ -55,6 +57,7 @@ public class SimulatorLogger {
 
     /**
      * Repeats the provided string X times.
+     *
      * @param str
      * @param num
      * @return
@@ -67,6 +70,7 @@ public class SimulatorLogger {
      * Log all items to a file.
      * This file can be found in the Logs folder.
      * The filename is 'Log_{Unix Timestamp}.txt'
+     *
      * @throws IOException
      */
     public void writeToFile() throws IOException {
@@ -77,8 +81,11 @@ public class SimulatorLogger {
         // Create the Logs folder in case it doesn't exist.
         new File("Logs/").mkdir();
 
+        // Create a filename for this log item. Use the unix timestamp to make every log unique.
+        String fileName = "Logs/Log_" + (System.currentTimeMillis() / 1000L) + ".txt";
+
         // Open the log file.
-        BufferedWriter file = new BufferedWriter(new FileWriter("Logs/Log_" + (System.currentTimeMillis() / 1000L) + ".txt"));
+        BufferedWriter file = new BufferedWriter(new FileWriter(fileName));
 
         // Write each log item and make sure every column is aligned.
         for (LogItem item : _items) {
@@ -92,6 +99,10 @@ public class SimulatorLogger {
             file.newLine();
         }
         file.close();
+
+        // Open the txt file in the default editor of this computer.
+        Desktop.getDesktop().open(new File(fileName));
+
         _lock.unlock();
     }
 }

@@ -1,27 +1,22 @@
 package TSPSimulator.Database;
 
-import java.sql.*;
+import TSPSimulator.Database.Exceptions.OrderNotFoundException;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbProduct {
+public class DbProduct extends Db {
     private static DbProduct s_DbProduct;
 
-    private Connection conn;
     private DbProduct() {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/magazijnrobot","root","");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
     }
 
     /**
      * Returns the singleton of DbProduct
+     *
      * @return
      */
     public static DbProduct Get() {
@@ -33,12 +28,17 @@ public class DbProduct {
 
     /**
      * Finds all the products of an order including the location.
+     *
      * @param order
      * @return
      * @throws SQLException
      */
-    public List<TSPSimulator.Models.Product> findProductsForOrder(int order) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT p.*, s.* FROM Product p\n" +
+    public List<TSPSimulator.Models.Product> findProductsForOrder(int order) throws SQLException, OrderNotFoundException {
+        if (!DbOrder.Get().orderExists(order)) {
+            throw new OrderNotFoundException(order);
+        }
+
+        PreparedStatement stmt = getConnection().prepareStatement("SELECT p.*, s.* FROM Product p\n" +
                 "INNER JOIN product_order o ON p.productid = o.orderid\n" +
                 "INNER JOIN shelve s ON o.shelveid = s.ShelveId\n" +
                 "WHERE o.orderid = ?");
@@ -48,6 +48,7 @@ public class DbProduct {
         while (rs.next()) {
             res.add(TSPSimulator.Models.Product.fromResultSet(rs));
         }
+        stmt.close();
         return res;
     }
 }

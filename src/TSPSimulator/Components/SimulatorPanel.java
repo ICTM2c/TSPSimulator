@@ -1,19 +1,21 @@
 package TSPSimulator.Components;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
 import TSPSimulator.Logging.SimulatorLogger;
 import TSPSimulator.Simulators.Simulator;
 import TSPSimulator.Simulators.SimulatorBruteForce;
 import TSPSimulator.Util;
 import javafx.geometry.Point2D;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+
+import static TSPSimulator.Util.map;
 
 public class SimulatorPanel extends JPanel implements MouseListener {
     private int _sizeX = 5;
@@ -26,6 +28,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
 
     private Runnable onStartSimulationCallback;
     private Runnable onEndSimulationCallback;
+    private Consumer<List<Point2D>> onSelectionChangedCallback;
 
     public void registerOnStartSimulationCallback(Runnable callback) {
         onStartSimulationCallback = callback;
@@ -33,6 +36,17 @@ public class SimulatorPanel extends JPanel implements MouseListener {
 
     public void registerOnEndSimulationCallback(Runnable callback) {
         onEndSimulationCallback = callback;
+    }
+
+    public void registerOnSelectionChanged(Consumer<List<Point2D>> callback) {
+        onSelectionChangedCallback = callback;
+    }
+
+    private void callOnSelectionChanged(List<Point2D> points) {
+        if (onSelectionChangedCallback == null) {
+            return;
+        }
+        onSelectionChangedCallback.accept(points);
     }
 
     public SimulatorPanel() {
@@ -46,7 +60,9 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     //region GridClicked
     private void fillClicked() {
         _clicked = new boolean[_sizeX * _sizeY];
+        callOnSelectionChanged(new ArrayList<Point2D>());
     }
+
     public void clearClicked() {
         fillClicked();
     }
@@ -54,6 +70,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     public void setIsClicked(int x, int y, boolean clicked) {
         int index = makeIndex(x, y);
         _clicked[index] = clicked;
+        callOnSelectionChanged(getPoints());
     }
 
     public int makeIndex(int x, int y) {
@@ -68,6 +85,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     public void toggleIsSelected(int x, int y) {
         int index = makeIndex(x, y);
         _clicked[index] = !_clicked[index];
+        callOnSelectionChanged(getPoints());
     }
     //endregion
 
@@ -184,14 +202,9 @@ public class SimulatorPanel extends JPanel implements MouseListener {
 
     //endregion
 
-    int map(int x, int in_min, int in_max, int out_min, int out_max) {
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-    }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        int clickX = e.getX();
-        int clickY = e.getY();
         int x = map(e.getX(), 0, getWidth(), 0, _sizeX);
         int y = map(e.getY(), 0, getHeight(), 0, _sizeY);
         toggleIsSelected(x, y);
@@ -230,10 +243,9 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         drawPanel();
     }
 
-    /*
-    Executes the provided simulators
+    /**
+     * Executes the provided simulators
      */
-
     public List<Color> setSimulators(List<Simulator> selectedSimulators) {
         _simulatorLogger = null;
         _simulators = selectedSimulators;
@@ -246,8 +258,8 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     }
 
     /**
-     If the simulator thread is working it stops it and writes "Interrupted" on the panel.
-      */
+     * If the simulator thread is working it stops it and writes "Interrupted" on the panel.
+     */
     public void cancelSimulations() {
         if (_simulateThread.isAlive()) {
             _simulateThread.stop();
@@ -258,6 +270,8 @@ public class SimulatorPanel extends JPanel implements MouseListener {
             onEndSimulationCallback.run();
         }
     }
+
+
     public void simulateAndLog() {
         cancelSimulations();
         _simulatorLogger = new SimulatorLogger();
@@ -269,11 +283,13 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         if (_simulatorLogger == null) {
             return;
         }
+
         try {
             _simulatorLogger.writeToFile();
             _simulatorLogger = null;
         } catch (IOException e) {
-            //e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Unable to write log to a file.");
+            e.printStackTrace();
         }
     }
 

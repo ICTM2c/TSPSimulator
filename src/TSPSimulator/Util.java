@@ -37,4 +37,12 @@ public class Util {
         g.drawLine(x1, y1, x2, y2);
         g.fillPolygon(xpoints, ypoints, 3);
     }
+
+    public static int clamp(int val, int min, int max) {
+        return (val < min) ? min : ((val > max) ? max : val);
+    }
+
+    public static int map(int x, int in_min, int in_max, int out_min, int out_max) {
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }
 }

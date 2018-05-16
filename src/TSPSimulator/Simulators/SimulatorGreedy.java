@@ -26,6 +26,7 @@ public class SimulatorGreedy implements Simulator {
 
     /**
      * From the list of leftovers it searches for the closest point relative to the current point and returns it.
+     *
      * @param current
      * @param leftOver
      * @return

@@ -14,7 +14,7 @@ public class HeaderPanel extends Panel {
         return subPanel;
     }
 
-    public HeaderPanel(String headerText, JButton btn, Component ... components) {
+    public HeaderPanel(String headerText, JButton btn, Component... components) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         JLabel header = new JLabel(headerText);
         header.setFont(new Font("Serif", Font.BOLD, 20));
