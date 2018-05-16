@@ -19,6 +19,12 @@ public class Product {
         _location = new Point2D(x, y);
     }
 
+    /**
+     * Creates a new Product object based on the provided ResultSet
+     * @param rs
+     * @return
+     * @throws SQLException
+     */
     public static Product fromResultSet(ResultSet rs) throws SQLException {
         Product pr = new Product(rs.getInt("productid"), rs.getInt("size"));
         pr.setPosition(rs.getInt("X"), rs.getInt("Y"));

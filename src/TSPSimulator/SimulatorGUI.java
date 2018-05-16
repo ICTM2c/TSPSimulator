@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class SimulatorGUI extends JFrame implements ActionListener, ListSelectionListener {
+    //region Components
     private SimulatorPanel pnlSimulator;
     private JList<Simulator> liSimulators;
     private JNumberTextField tbSizeX;
@@ -35,10 +36,15 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
     private JButton btnChangeSize;
     private Panel pnlUserInteraction;
     private JButton btnInputOrderFile;
+    private Timer _timer;
+    //endregion
 
+    //region Constants
     final int MAX_GRID_SIZE = 20;
     final int MIN_GRID_SIZE = 5;
+    //endregion
 
+    //region Constructors
     public SimulatorGUI() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -51,11 +57,36 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         addSimulatorComponents();
         addAdjustSizeComponents();
         addOrderFileInputComponents();
+        addTimer();
 
         add(pnlUserInteraction);
         setVisible(true);
+
+
+    }
+    //endregion
+
+    //region ComponentInitialisation
+
+    /**
+     * Creates a timer but won't start it.
+     * It will be started when a simulation has started and stopped if the simulation is finished before the timer is called.
+     * When the timer is called it will ask the user if the simulation should be canceled
+     */
+    private void addTimer() {
+        SimulatorGUI self = this;
+        _timer = new Timer(10000, arg0 -> {
+            int res = JOptionPane.showConfirmDialog(self, "The simulator has been running for 10 seconds. Would you like to cancel it?", "Cancel?", JOptionPane.YES_NO_OPTION);
+            if (res == JOptionPane.YES_OPTION) {
+                pnlSimulator.cancelSimulations();
+            }
+        });
+        _timer.setRepeats(false);
     }
 
+    /**
+     * Adds the components which the user can use to insert a order file.
+     */
     private void addOrderFileInputComponents() {
         btnInputOrderFile = new JButton("Bestand");
         btnInputOrderFile.addActionListener(this);
@@ -63,6 +94,9 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         pnlUserInteraction.add(panel);
     }
 
+    /**
+     * Adds the components which the user can use to select and see the result of simulations
+     */
     private void addSimulatorComponents() {
         btnStartCancelSimulation = new JButton("Simulate");
         btnStartCancelSimulation.addActionListener(this);
@@ -86,10 +120,6 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         _selectedCellRenderer.setColors(colors);
     }
 
-    private void onGridSelectionChanged(List<Point2D> points) {
-        btnStartCancelSimulation.setEnabled(!points.isEmpty());
-    }
-
 
     /**
      * Adds the GUI components that allow the user to adjust the size of the grid.
@@ -109,15 +139,36 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         HeaderPanel sizePanel = new HeaderPanel("Grootte panel", btnChangeSize, new JLabel("X - Y"), tbSizeX, tbSizeY);
         pnlUserInteraction.add(sizePanel);
     }
+    //endregion
 
+    //region PanelEvents
+
+    /**
+     * Called when the user selects or deselects squares on the grid.
+     * @param points
+     */
+    private void onGridSelectionChanged(List<Point2D> points) {
+        btnStartCancelSimulation.setEnabled(!points.isEmpty());
+    }
+
+    /**
+     * Called when a new simulation is beeing executed.
+     */
     private void onStartSimulation() {
         btnStartCancelSimulation.setText("Cancel");
+        _timer.start();
     }
 
-    public void onEndSimulation() {
+    /**
+     * Called when the simulations are finished or the user canceled them.
+     */
+    private void onEndSimulation() {
         btnStartCancelSimulation.setText("Simulate");
+        _timer.stop();
     }
+    //endregion
 
+    //region ComponentEvents
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == tbSizeX) {
@@ -140,6 +191,23 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         }
     }
 
+
+    /**
+     * Called when the user adjusts the JList containing all the simulators.
+     * @param e
+     */
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        List<Simulator> selectedSimulators = liSimulators.getSelectedValuesList();
+        List<Color> colors = pnlSimulator.setSimulators(selectedSimulators);
+        _selectedCellRenderer.setColors(colors);
+        liSimulators.repaint();
+    }
+
+    /**
+     * Called when the user presses the input file button.
+     * Shows a filechooser dialog and tries to load it as an order file.
+     */
     private void selectGridFromOrder() {
         //Create a file chooser
         final JFileChooser fc = new JFileChooser();
@@ -183,14 +251,6 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         } catch (OrderNotFoundException e) {
             JOptionPane.showMessageDialog(this, e.toString());
         }
-
     }
-
-    @Override
-    public void valueChanged(ListSelectionEvent e) {
-        List<Simulator> selectedSimulators = liSimulators.getSelectedValuesList();
-        List<Color> colors = pnlSimulator.setSimulators(selectedSimulators);
-        _selectedCellRenderer.setColors(colors);
-        liSimulators.repaint();
-    }
+    //endregion
 }

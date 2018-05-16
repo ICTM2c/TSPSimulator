@@ -38,10 +38,28 @@ public class Util {
         g.fillPolygon(xpoints, ypoints, 3);
     }
 
+    /**
+     * Makes sure that 'val' doesn't exceed or either the minimum or maximum value.
+     * @param val
+     * @param min
+     * @param max
+     * @return
+     */
     public static int clamp(int val, int min, int max) {
         return (val < min) ? min : ((val > max) ? max : val);
     }
 
+    /**
+     * https://www.arduino.cc/reference/en/language/functions/math/map/
+     *
+     * Re-maps a number from one range to another. That is, a value of fromLow would get mapped to toLow, a value of fromHigh to toHigh, values in-between to values in-between, etc.
+     * @param x
+     * @param in_min
+     * @param in_max
+     * @param out_min
+     * @param out_max
+     * @return
+     */
     public static int map(int x, int in_min, int in_max, int out_min, int out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }

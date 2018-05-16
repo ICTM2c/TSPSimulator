@@ -6,6 +6,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * Renderer for the JList component to add colors
+ */
 public class SimulatorRenderer extends JLabel implements ListCellRenderer<Simulator> {
     private java.util.List<Color> _colors;
 
