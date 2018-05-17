@@ -2,6 +2,7 @@ package TSPSimulator.Simulators;
 
 import javafx.geometry.Point2D;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,11 @@ public class SimulatorGreedy implements Simulator {
         }
         route.add(startEndPoint);
         return route;
+    }
+
+    @Override
+    public Color getColor() {
+        return Color.orange;
     }
 
     /**

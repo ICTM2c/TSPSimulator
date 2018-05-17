@@ -31,7 +31,6 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
     private JList<Simulator> liSimulators;
     private JNumberTextField tbSizeX;
     private JNumberTextField tbSizeY;
-    private SimulatorRenderer _selectedCellRenderer;
     private JButton btnStartCancelSimulation;
     private JButton btnChangeSize;
     private Panel pnlUserInteraction;
@@ -105,19 +104,19 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         pnlSimulator = new SimulatorPanel();
         add(pnlSimulator);
 
-        _selectedCellRenderer = new SimulatorRenderer();
+        // Renderer used to give the simulators on the JList their color.
+        SimulatorRenderer selectedCellRenderer = new SimulatorRenderer();
         liSimulators = new JList<>(new Simulator[]{new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(), new SimulatorGreedyForce()});
         liSimulators.setSelectedIndex(0);
-        liSimulators.setCellRenderer(_selectedCellRenderer);
+        liSimulators.setCellRenderer(selectedCellRenderer);
         liSimulators.addListSelectionListener(this);
         pnlUserInteraction.add(new HeaderPanel("Algorithms", btnStartCancelSimulation, liSimulators));
 
         // Register the callbacks for the tsp visualizer panel.
-        List<Color> colors = pnlSimulator.setSimulators(liSimulators.getSelectedValuesList());
+        pnlSimulator.setSimulators(liSimulators.getSelectedValuesList());
         pnlSimulator.registerOnEndSimulationCallback(this::onEndSimulation);
         pnlSimulator.registerOnStartSimulationCallback(this::onStartSimulation);
         pnlSimulator.registerOnSelectionChanged(this::onGridSelectionChanged);
-        _selectedCellRenderer.setColors(colors);
     }
 
 
@@ -199,8 +198,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
     @Override
     public void valueChanged(ListSelectionEvent e) {
         List<Simulator> selectedSimulators = liSimulators.getSelectedValuesList();
-        List<Color> colors = pnlSimulator.setSimulators(selectedSimulators);
-        _selectedCellRenderer.setColors(colors);
+        pnlSimulator.setSimulators(selectedSimulators);
         liSimulators.repaint();
     }
 

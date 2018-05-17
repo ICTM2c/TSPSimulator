@@ -2,6 +2,7 @@ package TSPSimulator.Simulators;
 
 import javafx.geometry.Point2D;
 
+import java.awt.*;
 import java.util.List;
 
 public class SimulatorGreedyForce implements Simulator {
@@ -16,6 +17,11 @@ public class SimulatorGreedyForce implements Simulator {
         else {
             return _bruteForce.simulate(startEndPoint, points);
         }
+    }
+
+    @Override
+    public Color getColor() {
+        return Color.MAGENTA;
     }
 
     @Override

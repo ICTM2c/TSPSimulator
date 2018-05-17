@@ -2,6 +2,7 @@ package TSPSimulator.Simulators;
 
 import javafx.geometry.Point2D;
 
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.List;
 
@@ -12,6 +13,11 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
         twoOpt(list);
 
         return list;
+    }
+
+    @Override
+    public Color getColor() {
+        return Color.green;
     }
 
     private Line2D getLastLine(List<Point2D> points) {

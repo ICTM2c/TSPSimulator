@@ -2,6 +2,7 @@ package TSPSimulator.Simulators;
 
 import javafx.geometry.Point2D;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +42,11 @@ public class SimulatorBruteForce implements Simulator {
         });
 
         return _shortest;
+    }
+
+    @Override
+    public Color getColor() {
+        return Color.RED;
     }
 
     public static double getLength(List<Point2D> track) {

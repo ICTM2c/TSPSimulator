@@ -2,6 +2,7 @@ package TSPSimulator.Simulators;
 
 import javafx.geometry.Point2D;
 
+import java.awt.*;
 import java.util.List;
 
 public class SimulatorSmartGreedy extends SimulatorGreedy {
@@ -14,6 +15,11 @@ public class SimulatorSmartGreedy extends SimulatorGreedy {
         }
         _startEndPoint = startEndPoint;
         return super.simulate(startEndPoint, points);
+    }
+
+    @Override
+    public Color getColor() {
+        return Color.blue;
     }
 
     /**

@@ -19,7 +19,6 @@ import static TSPSimulator.Util.map;
 
 public class SimulatorPanel extends JPanel implements MouseListener {
     //region Fields
-    private static final Color[] s_pathColors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.ORANGE};
     private int _sizeX = 5;
     private int _sizeY = 5;
     private boolean[] _clicked;
@@ -146,13 +145,11 @@ public class SimulatorPanel extends JPanel implements MouseListener {
                     _simulatorLogger.logResult(simulator.toString(), endTime - startTime, SimulatorBruteForce.getLength(route));
                 }
 
-                int currentSimulatorIndex = _simulators.indexOf(simulator);
-
                 // Draw the paths on the UI thread.
                 SimulatorPanel self = this;
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        drawRoute(self.getGraphics(), route, _simulators.size(), currentSimulatorIndex);
+                        drawRoute(self.getGraphics(), route, simulator);
                     }
                 });
 
@@ -169,17 +166,19 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         _simulateThread.start();
     }
 
-    private void drawRoute(Graphics g, List<Point2D> route, int numSimulators, int currentSimulatorIndex) {
+    private void drawRoute(Graphics g, List<Point2D> route, Simulator simulator) {
         g.setColor(Color.RED);
         double squareWidth = ((double) getWidth() / (double) _sizeX);
         double squareHeight = ((double) getHeight() / (double) _sizeY);
 
+
+        int numSimulators = _simulators.size();
         double offsetWidth = squareWidth / (numSimulators + 1);
         double offsetHeight = squareHeight / (numSimulators + 1);
 
-        g.setColor(s_pathColors[currentSimulatorIndex]);
+        g.setColor(simulator.getColor());
 
-        currentSimulatorIndex++;
+        int currentSimulatorIndex = _simulators.indexOf(simulator) + 1;
         for (int i = 0; i < route.size() - 1; i++) {
             Point2D current = route.get(i);
             Point2D next = route.get(i + 1);
@@ -222,6 +221,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     }
 
     public void drawPanel() {
+        cancelSimulations();
         repaint();
     }
 
@@ -239,7 +239,6 @@ public class SimulatorPanel extends JPanel implements MouseListener {
 
 
     public void setSimulator(Simulator selectedItem) {
-        cancelSimulations();
         _simulators = new ArrayList<Simulator>();
         _simulators.add(selectedItem);
         drawPanel();
@@ -267,7 +266,6 @@ public class SimulatorPanel extends JPanel implements MouseListener {
      * @param integer
      */
     public void setSizeX(Integer integer) {
-        cancelSimulations();
         _sizeX = integer;
         fillClicked();
         drawPanel();
@@ -287,16 +285,11 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     /**
      * Executes the provided simulators
      */
-    public List<Color> setSimulators(List<Simulator> selectedSimulators) {
-        cancelSimulations();
+    public void setSimulators(List<Simulator> selectedSimulators) {
+
         _simulatorLogger = null;
         _simulators = selectedSimulators;
-        List<Color> colors = new ArrayList<>();
-        for (int i = 0; i < _simulators.size(); i++) {
-            colors.add(s_pathColors[i]);
-        }
         drawPanel();
-        return colors;
     }
 
     /**
@@ -319,7 +312,6 @@ public class SimulatorPanel extends JPanel implements MouseListener {
      * Starts the simulation like normal, but logs the results to a file.
      */
     public void simulateAndLog() {
-        cancelSimulations();
         _simulatorLogger = new SimulatorLogger();
         drawPanel();
     }

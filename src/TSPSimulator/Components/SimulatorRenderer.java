@@ -21,8 +21,8 @@ public class SimulatorRenderer extends JLabel implements ListCellRenderer<Simula
         setText(value.toString());
         java.util.List<Simulator> selectedSimulators = (List<Simulator>) list.getSelectedValuesList();
         if (selectedSimulators.contains(value)) {
-            this.setBackground(_colors.get(selectedSimulators.indexOf(value)));
-            setForeground(_colors.get(selectedSimulators.indexOf(value)));
+            setForeground(value.getColor());
+            setBackground(value.getColor());
         } else {
             setBackground(Color.WHITE);
             setForeground(Color.BLACK);
