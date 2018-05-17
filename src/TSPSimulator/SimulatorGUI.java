@@ -106,7 +106,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         add(pnlSimulator);
 
         _selectedCellRenderer = new SimulatorRenderer();
-        liSimulators = new JList<>(new Simulator[]{new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(),});
+        liSimulators = new JList<>(new Simulator[]{new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(), new SimulatorGreedyForce()});
         liSimulators.setSelectedIndex(0);
         liSimulators.setCellRenderer(_selectedCellRenderer);
         liSimulators.addListSelectionListener(this);

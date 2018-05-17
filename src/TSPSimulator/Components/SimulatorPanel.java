@@ -19,13 +19,20 @@ import static TSPSimulator.Util.map;
 
 public class SimulatorPanel extends JPanel implements MouseListener {
     //region Fields
+    private static final Color[] s_pathColors = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.ORANGE};
     private int _sizeX = 5;
     private int _sizeY = 5;
     private boolean[] _clicked;
     private List<Simulator> _simulators;
-    private static final Color[] s_pathColors = new Color[]{Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE};
+
+    // Thread on which all the simulators will be started. The simulators will each get their own thread using a parallelStream.
     Thread _simulateThread = new Thread();
+
+    // Will be filled when the user wants to log the results to a file.
     private SimulatorLogger _simulatorLogger;
+    //endregion
+
+    //region Events
     private Runnable onStartSimulationCallback;
     private Runnable onEndSimulationCallback;
     private Consumer<List<Point2D>> onSelectionChangedCallback;
@@ -124,6 +131,10 @@ public class SimulatorPanel extends JPanel implements MouseListener {
                 try {
                     // Execute the simulation and save the route.
                     route = simulator.simulate(startEndPoint, copyOfPoints);
+                }
+                catch (StackOverflowError e) {
+                    JOptionPane.showMessageDialog(this, simulator.toString() + " has crashed.");
+                    return;
                 }
                 catch (Exception e) {
                     JOptionPane.showMessageDialog(this, simulator.toString() + " has crashed.");
