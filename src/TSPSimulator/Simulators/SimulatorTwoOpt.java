@@ -55,7 +55,7 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
                 );
 
 
-                if (doesIntersect) {// && !lastLine.intersectsLine(line1Point1.getX(), line1Point1.getY(), line2Point2.getX(), line2Point2.getY()) && !lastLine.intersectsLine(line2Point1.getX(), line2Point1.getY(), line1Point2.getX(), line1Point2.getY())) {
+                if (doesIntersect) {
                     swap(points, i1 + 1, i2 + 1);
                     didIntersect = true;
                 }

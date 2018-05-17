@@ -74,9 +74,8 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
      * When the timer is called it will ask the user if the simulation should be canceled
      */
     private void addTimer() {
-        SimulatorGUI self = this;
         _timer = new Timer(10000, arg0 -> {
-            int res = JOptionPane.showConfirmDialog(self, "The simulator has been running for 10 seconds. Would you like to cancel it?", "Cancel?", JOptionPane.YES_NO_OPTION);
+            int res = JOptionPane.showConfirmDialog(this, "The simulator has been running for 10 seconds. Would you like to cancel it?", "Cancel?", JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
                 pnlSimulator.cancelSimulations();
             }
@@ -113,6 +112,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         liSimulators.addListSelectionListener(this);
         pnlUserInteraction.add(new HeaderPanel("Algorithms", btnStartCancelSimulation, liSimulators));
 
+        // Register the callbacks for the tsp visualizer panel.
         List<Color> colors = pnlSimulator.setSimulators(liSimulators.getSelectedValuesList());
         pnlSimulator.registerOnEndSimulationCallback(this::onEndSimulation);
         pnlSimulator.registerOnStartSimulationCallback(this::onStartSimulation);

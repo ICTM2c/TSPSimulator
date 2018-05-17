@@ -7,6 +7,7 @@ import java.util.List;
 
 public class SimulatorBruteForce implements Simulator {
 
+    // Variables from outside a lambda can't be ussed unless they're marked as 'final', but fields are allowed.
     double _shortestLength;
     List<Point2D> _shortest;
 

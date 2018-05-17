@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 import static TSPSimulator.Util.map;
 
 public class SimulatorPanel extends JPanel implements MouseListener {
+    //region Fields
     private int _sizeX = 5;
     private int _sizeY = 5;
     private boolean[] _clicked;
@@ -25,11 +26,12 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     private static final Color[] s_pathColors = new Color[]{Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE};
     Thread _simulateThread = new Thread();
     private SimulatorLogger _simulatorLogger;
-
     private Runnable onStartSimulationCallback;
     private Runnable onEndSimulationCallback;
     private Consumer<List<Point2D>> onSelectionChangedCallback;
+    //endregion
 
+    //region RegisterCallbacks
     public void registerOnStartSimulationCallback(Runnable callback) {
         onStartSimulationCallback = callback;
     }
@@ -41,6 +43,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     public void registerOnSelectionChanged(Consumer<List<Point2D>> callback) {
         onSelectionChangedCallback = callback;
     }
+    //endregion
 
     private void callOnSelectionChanged(List<Point2D> points) {
         if (onSelectionChangedCallback == null) {
@@ -115,9 +118,19 @@ public class SimulatorPanel extends JPanel implements MouseListener {
                 // Make a copy of the selected point list. Otherwise simulators might interfere with each other.
                 List<Point2D> copyOfPoints = new ArrayList<>(points);
 
+                // Record the start time so we can calculate how long it took to complete this simulation.
                 long startTime = System.currentTimeMillis();
-                List<Point2D> route = simulator.simulate(startEndPoint, copyOfPoints);
+                List<Point2D> route;
+                try {
+                    // Execute the simulation and save the route.
+                    route = simulator.simulate(startEndPoint, copyOfPoints);
+                }
+                catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, simulator.toString() + " has crashed.");
+                    return;
+                }
                 long endTime = System.currentTimeMillis();
+
                 if (_simulatorLogger != null) {
                     _simulatorLogger.logResult(simulator.toString(), endTime - startTime, SimulatorBruteForce.getLength(route));
                 }
@@ -134,6 +147,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
 
             });
 
+            // Write the log and end the simulation on the main thread.
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     writeLog();
@@ -212,13 +226,19 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         drawPanel();
     }
 
+
     public void setSimulator(Simulator selectedItem) {
+        cancelSimulations();
         _simulators = new ArrayList<Simulator>();
         _simulators.add(selectedItem);
         drawPanel();
     }
 
 
+    /**
+     * Return a list of all the squares on the grid which are selected.
+     * @return
+     */
     public List<Point2D> getPoints() {
         List<Point2D> list = new ArrayList<>();
         for (int x = 0; x < _sizeX; x++) {
@@ -231,13 +251,23 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         return list;
     }
 
+    /**
+     * Set the X size (width) of the grid
+     * @param integer
+     */
     public void setSizeX(Integer integer) {
+        cancelSimulations();
         _sizeX = integer;
         fillClicked();
         drawPanel();
     }
 
+    /**
+     * Set they Y size (height) of the grid.
+     * @param integer
+     */
     public void setSizeY(Integer integer) {
+        cancelSimulations();
         _sizeY = integer;
         fillClicked();
         drawPanel();
@@ -247,6 +277,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
      * Executes the provided simulators
      */
     public List<Color> setSimulators(List<Simulator> selectedSimulators) {
+        cancelSimulations();
         _simulatorLogger = null;
         _simulators = selectedSimulators;
         List<Color> colors = new ArrayList<>();
@@ -271,7 +302,11 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         }
     }
 
+    //region SimulatorWithLog
 
+    /**
+     * Starts the simulation like normal, but logs the results to a file.
+     */
     public void simulateAndLog() {
         cancelSimulations();
         _simulatorLogger = new SimulatorLogger();
@@ -279,6 +314,9 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     }
 
 
+    /**
+     * If the results should be written to a file it logs them.
+     */
     private void writeLog() {
         if (_simulatorLogger == null) {
             return;
@@ -292,6 +330,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
             e.printStackTrace();
         }
     }
+    //endregion
 
     //region UnusedEvents
     // Lots of unised events because Oracle thought it was a good idea to automatically register all events.
