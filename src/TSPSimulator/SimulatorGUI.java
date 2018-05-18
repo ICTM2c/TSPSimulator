@@ -48,7 +48,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         setLayout(new FlowLayout());
-        setSize(800, 500);
+        setSize(800, 450);
 
         pnlUserInteraction = new Panel();
         pnlUserInteraction.setLayout(new GridLayout(0, 2, 10, 10));
@@ -96,9 +96,12 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
      * Adds the components which the user can use to select and see the result of simulations
      */
     private void addSimulatorComponents() {
-        btnStartCancelSimulation = new JButton("Simulate");
+        btnStartCancelSimulation = new JButton("Simulate and Log");
         btnStartCancelSimulation.addActionListener(this);
         btnStartCancelSimulation.setEnabled(false);
+        // Width: 132 and height: 26 is the default size for the button when the text is "Simulate and Log".
+        // Without explicitly setting the size the whole screen jitters when the text is set to cancel.
+        btnStartCancelSimulation.setPreferredSize(new Dimension(132, 26));
         add(btnStartCancelSimulation);
 
         pnlSimulator = new SimulatorPanel();
@@ -162,7 +165,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
      * Called when the simulations are finished or the user canceled them.
      */
     private void onEndSimulation() {
-        btnStartCancelSimulation.setText("Simulate");
+        btnStartCancelSimulation.setText("Simulate and Log");
         _timer.stop();
     }
     //endregion

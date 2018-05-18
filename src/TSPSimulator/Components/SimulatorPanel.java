@@ -131,11 +131,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
                     // Execute the simulation and save the route.
                     route = simulator.simulate(startEndPoint, copyOfPoints);
                 }
-                catch (StackOverflowError e) {
-                    JOptionPane.showMessageDialog(this, simulator.toString() + " has crashed.");
-                    return;
-                }
-                catch (Exception e) {
+                catch (StackOverflowError | Exception e) {
                     JOptionPane.showMessageDialog(this, simulator.toString() + " has crashed.");
                     return;
                 }
@@ -166,6 +162,12 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         _simulateThread.start();
     }
 
+    /**
+     * Paints the resulting route of the provided simulator.
+     * @param g
+     * @param route
+     * @param simulator
+     */
     private void drawRoute(Graphics g, List<Point2D> route, Simulator simulator) {
         g.setColor(Color.RED);
         double squareWidth = ((double) getWidth() / (double) _sizeX);
@@ -191,6 +193,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
             );
         }
     }
+
 
     private void drawSelectedSquares(Graphics g) {
         g.setColor(Color.BLACK);

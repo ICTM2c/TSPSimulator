@@ -23,9 +23,7 @@ abstract class Db {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             s_connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/magazijnrobot", "root", "");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return s_connection;

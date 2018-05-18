@@ -1,5 +1,6 @@
 package TSPSimulator.Simulators;
 
+import TSPSimulator.Util;
 import javafx.geometry.Point2D;
 
 import java.awt.*;
@@ -20,27 +21,20 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
         return Color.green;
     }
 
-    private Line2D getLastLine(List<Point2D> points) {
-        Point2D lastPoint = points.get(points.size() - 1);
-        Point2D secondToLastPoint = points.get(points.size() - 2);
-        return new Line2D.Double(lastPoint.getX(), lastPoint.getY(), secondToLastPoint.getX(), secondToLastPoint.getY());
-    }
-
     public void twoOpt(List<Point2D> points) {
         int numPoints = points.size() - 2;
         boolean didIntersect = false;
 
-        Line2D lastLine = getLastLine(points);
-        for (int i1 = 0; i1 < numPoints; i1++) {
-            for (int i2 = 0; i2 < numPoints; i2++) {
-                if (i1 == i2) {
+        for (int i1 = 0; i1 < numPoints + 1; i1++) {
+            for (int i2 = numPoints + 1; i2 > 0; i2--) {
+                if (i1 == i2 + 1) {
                     continue;
                 }
 
                 Point2D line1Point1 = points.get(i1);
                 Point2D line1Point2 = points.get(i1 + 1);
                 Point2D line2Point1 = points.get(i2);
-                Point2D line2Point2 = points.get(i2 + 1);
+                Point2D line2Point2 = points.get(i2 - 1);
 
                 if (
                         line1Point1.equals(line2Point1) || line1Point1.equals(line2Point2) ||
@@ -62,7 +56,7 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
 
 
                 if (doesIntersect) {
-                    swap(points, i1 + 1, i2 + 1);
+                    Util.swap(points, i1 + 1, i2 - 1);
                     didIntersect = true;
                 }
             }
@@ -73,21 +67,7 @@ public class SimulatorTwoOpt extends SimulatorSmartGreedy {
         }
     }
 
-    public float getAngle(Point2D target1, Point2D target2) {
-        float angle = (float) Math.toDegrees(Math.atan2(target1.getY() - target2.getY(), target1.getX() - target2.getX()));
 
-        if (angle < 0) {
-            angle += 360;
-        }
-
-        return angle;
-    }
-
-    void swap(List<Point2D> lst, int x, int y) {
-        Point2D temp = lst.get(x);
-        lst.set(x, lst.get(y));
-        lst.set(y, temp);
-    }
 
     @Override
     public String toString() {
