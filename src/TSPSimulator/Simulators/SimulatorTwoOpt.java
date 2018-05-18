@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.List;
 
-public class SimulatorTwoOpt extends SimulatorSmartGreedy {
+public class SimulatorTwoOpt extends SimulatorGreedy {
     @Override
     public List<Point2D> simulate(Point2D startEndPoint, List<Point2D> points) {
         List<Point2D> list = super.simulate(startEndPoint, points);

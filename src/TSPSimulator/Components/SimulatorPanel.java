@@ -112,9 +112,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
         drawSelectedSquares(g);
 
         // If there is still a simulation going on stop it before starting new ones.
-        if (_simulateThread.isAlive()) {
-            _simulateThread.stop();
-        }
+        cancelSimulations();
 
         _simulateThread = new Thread(() -> {
             // Start calculating the paths in advance.
@@ -339,7 +337,7 @@ public class SimulatorPanel extends JPanel implements MouseListener {
     //endregion
 
     //region UnusedEvents
-    // Lots of unised events because Oracle thought it was a good idea to automatically register all events.
+    // Lots of unused events because Oracle thought it was a good idea to automatically register all events.
     @Override
     public void mousePressed(MouseEvent e) {
 

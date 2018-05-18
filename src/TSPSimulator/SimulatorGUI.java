@@ -109,7 +109,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
 
         // Renderer used to give the simulators on the JList their color.
         SimulatorRenderer selectedCellRenderer = new SimulatorRenderer();
-        liSimulators = new JList<>(new Simulator[]{new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(), new SimulatorGreedyForce()});
+        liSimulators = new JList<>(new Simulator[] { new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(), new SimulatorGreedyForce() });
         liSimulators.setSelectedIndex(0);
         liSimulators.setCellRenderer(selectedCellRenderer);
         liSimulators.addListSelectionListener(this);
