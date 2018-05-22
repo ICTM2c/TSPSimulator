@@ -109,7 +109,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
 
         // Renderer used to give the simulators on the JList their color.
         SimulatorRenderer selectedCellRenderer = new SimulatorRenderer();
-        liSimulators = new JList<>(new Simulator[] { new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(), new SimulatorGreedyForce() });
+        liSimulators = new JList<>(new Simulator[]{new SimulatorGreedy(), new SimulatorSmartGreedy(), new SimulatorTwoOpt(), new SimulatorBruteForce(), new SimulatorGreedyForce()});
         liSimulators.setSelectedIndex(0);
         liSimulators.setCellRenderer(selectedCellRenderer);
         liSimulators.addListSelectionListener(this);
@@ -147,6 +147,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
 
     /**
      * Called when the user selects or deselects squares on the grid.
+     *
      * @param points
      */
     private void onGridSelectionChanged(List<Point2D> points) {
@@ -196,6 +197,7 @@ public class SimulatorGUI extends JFrame implements ActionListener, ListSelectio
 
     /**
      * Called when the user adjusts the JList containing all the simulators.
+     *
      * @param e
      */
     @Override
