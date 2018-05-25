@@ -194,16 +194,22 @@ public class SimulatorPanel extends JPanel implements MouseListener {
 
 
     private void drawSelectedSquares(Graphics g) {
+        int squareWidth = (int) Math.ceil((double) getWidth() / (double) _sizeX);
+        int squareHeight = (int) Math.ceil((double) getHeight() / (double) _sizeY);
         g.setColor(Color.BLACK);
         for (int x = 0; x < _sizeX; x++) {
             int coordX = (int) ((double) x / (double) _sizeX * (double) getWidth());
             for (int y = 0; y < _sizeY; y++) {
                 int coordY = (int) ((double) y / (double) _sizeY * (double) getHeight());
                 if (isSelected(x, y)) {
-                    g.fillRect(coordX, coordY, (int) Math.ceil((double) getWidth() / (double) _sizeX), (int) Math.ceil((double) getHeight() / (double) _sizeY));
+                    g.fillRect(coordX, coordY, squareWidth, squareHeight);
                 }
             }
         }
+
+        // Create a green square at the start/end point
+        g.setColor(Color.LIGHT_GRAY);
+        g.fillRect(0, (int) ((double) (_sizeY - 1) / (double) _sizeY * (double) getHeight()), squareWidth, squareHeight);
     }
 
     private void drawPanel(Graphics g) {
