@@ -9,6 +9,7 @@ public class Product {
     private int _productId;
     private int _size;
     private Point2D _location;
+    private boolean _isPickedUp;
 
     public Product(int productId, int size) {
         _productId = productId;
